@@ -1,24 +1,38 @@
-const API_BASE = 'http://localhost:5000/api';
+const BASE_URL = 'http://localhost:5000/api';
 
-export async function calculate(x: number, y: number) {
-  const res = await fetch(`${API_BASE}/calculate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ x, y }),
-  });
-  return res.json();
+interface ParametrosModelo {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
 }
 
-export async function getSurface() {
-  const res = await fetch(`${API_BASE}/surface`);
-  return res.json();
-}
-
-export async function optimize(initialX: number, initialY: number) {
-  const res = await fetch(`${API_BASE}/optimize`, {
+export async function calculate(
+  x: number,
+  y: number,
+  parametros: ParametrosModelo,
+) {
+  const respuesta = await fetch(`${BASE_URL}/calculate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ x: initialX, y: initialY }),
+    body: JSON.stringify({ x, y, ...parametros }),
   });
-  return res.json();
+  if (!respuesta.ok) throw new Error('Error en /calculate');
+  return respuesta.json();
+}
+
+export async function getSurface(queryParams: string) {
+  const respuesta = await fetch(`${BASE_URL}/surface?${queryParams}`);
+  if (!respuesta.ok) throw new Error('Error en /surface');
+  return respuesta.json();
+}
+
+export async function optimize(parametros: ParametrosModelo) {
+  const respuesta = await fetch(`${BASE_URL}/optimize`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(parametros),
+  });
+  if (!respuesta.ok) throw new Error('Error en /optimize');
+  return respuesta.json();
 }
