@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
-import Plot from 'react-plotly.js';
+import dynamic from 'next/dynamic';
+
+const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
 interface DatosSuperifice {
   x: number[][];
@@ -13,20 +15,32 @@ interface Props {
   datos?: DatosSuperifice;
   puntoOptimo?: { x_optimo: number; y_optimo: number; valor_optimo: number } | null;
   cargando?: boolean;
+  modo?: 'superficie' | 'contorno';
 }
 
-export default function Plot3D({ datos, puntoOptimo, cargando }: Props) {
+export default function Plot3D({ datos, puntoOptimo, cargando, modo = 'superficie' }: Props) {
   const trazas: Plotly.Data[] = [];
 
   if (datos) {
-    trazas.push({
-      type: 'surface',
-      x: datos.x,
-      y: datos.y,
-      z: datos.z,
-      colorscale: 'Viridis',
-      name: 'R(x, y)',
-    });
+    if (modo === 'superficie') {
+      trazas.push({
+        type: 'surface',
+        x: datos.x,
+        y: datos.y,
+        z: datos.z,
+        colorscale: 'Viridis',
+        name: 'R(x, y)',
+      });
+    } else {
+      trazas.push({
+        type: 'contour',
+        x: datos.x[0],
+        y: datos.y.map(row => row[0]),
+        z: datos.z,
+        colorscale: 'Viridis',
+        name: 'R(x, y) Curvas de Nivel',
+      });
+    }
   }
 
   if (puntoOptimo) {
@@ -51,7 +65,7 @@ export default function Plot3D({ datos, puntoOptimo, cargando }: Props) {
       <Plot
         data={trazas.length > 0 ? trazas : [
           {
-            type: 'surface',
+            type: modo === 'superficie' ? 'surface' : 'contour',
             x: [[0]],
             y: [[0]],
             z: [[0]],
