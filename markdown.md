@@ -26,28 +26,29 @@
 - [x] **Plot 3D:** Componente Plotly renderizado (actualmente con datos demo hardcodeados)
 - [x] **Scripts:** `install.sh`, `start.sh`, `stop.sh` funcionales
 
-### ⏳ Pendiente — Backend (`/backend`)
-- [ ] **Modelo matemático (`core/math_model.py`):**
+### ✅ Completado — Backend (`/backend`)
+- [x] **Modelo matemático (`core/math_model.py`):**
   - Definir variables simbólicas `x`, `y` y función `R(x,y) = x^a * y^b * e^{-cx} * e^{-dy}`
   - Implementar cálculo de derivadas parciales `∂R/∂x` y `∂R/∂y`
   - Implementar gradiente `∇R(x,y)`
   - Evaluar funciones en puntos específicos
   - Encontrar puntos críticos (máximos, mínimos, puntos de silla)
-- [ ] **Endpoints (`api/routes.py`):**
+- [x] **Endpoints (`api/routes.py`):**
   - `POST /api/calculate`: Devolver `{resultado, parcial_x, parcial_y, gradiente}` dado `{x, y, a, b, c, d}`
   - `GET /api/surface`: Generar y devolver malla `{x, y, z}` para graficar la superficie
   - `POST /api/optimize`: Encontrar punto óptimo dados valores iniciales y constantes
-- [ ] **Aproximación lineal / plano tangente** (no implementado aún)
+- [x] **Aproximación lineal / plano tangente** (implementado)
+- [x] **Persistencia de datos:** Endpoints de escenarios (`/escenarios`) y base de datos con SQLAlchemy.
 
-### ⏳ Pendiente — Frontend (`/frontend`)
-- [ ] **Conectar inputs con estado:** Usar `useState` para `x`, `y`, constantes `a, b, c, d`
-- [ ] **Sliders para constantes a, b, c, d:** Agregar controles específicos para cada constante del modelo
-- [ ] **Botón "Calcular":** Conectar a `POST /api/calculate` y mostrar resultados
-- [ ] **Panel de resultados:** Mostrar rendimiento calculado, derivadas parciales, gradiente
-- [ ] **Gráfico 3D:** Reemplazar datos demo con datos reales desde `GET /api/surface`
-- [ ] **Curvas de nivel:** Agregar visualización de contornos `R(x,y) = c`
-- [ ] **Optimización:** Botón para ejecutar optimización y mostrar el punto máximo encontrado
-- [ ] **Estados de carga/error:** Manejar loading states y errores de API
+### ✅ Completado — Frontend (`/frontend`)
+- [x] **Conectar inputs con estado:** Usar `useState` para `x`, `y`, constantes `a, b, c, d`
+- [x] **Sliders para constantes a, b, c, d:** Agregar controles específicos para cada constante del modelo
+- [x] **Botón "Calcular":** Conectar a `POST /api/calculate` y mostrar resultados
+- [x] **Panel de resultados:** Mostrar rendimiento calculado, derivadas parciales, gradiente
+- [x] **Gráfico 3D:** Reemplazar datos demo con datos reales desde `GET /api/surface`
+- [x] **Curvas de nivel:** Agregar visualización de contornos `R(x,y) = c`
+- [x] **Optimización:** Botón para ejecutar optimización y mostrar el punto máximo encontrado
+- [x] **Estados de carga/error:** Manejo de loading states y corrección de interacción y diseño.
 
 ### ⏳ Pendiente — Documentación (`/docs`)
 - [ ] **Informe LaTeX (`informe.tex`):** Escribir contenido real (actualmente solo tiene secciones vacías con TODOs)
@@ -106,13 +107,13 @@ EID_CalculoAvanzado/
     │   ├── app.py           # Entry point de Flask
     │   ├── requirements.txt
     │   ├── core/
-    │   │   └── math_model.py    # ⚠️ POR IMPLEMENTAR
+    │   │   └── math_model.py
     │   └── api/
-    │       └── routes.py        # ⚠️ POR IMPLEMENTAR
+    │       └── routes.py        
     ├── frontend/
     │   ├── src/
-    │   │   ├── app/page.tsx         # ⚠️ POR IMPLEMENTAR (sin interactividad)
-    │   │   ├── components/Plot3D.tsx # ⚠️ Datos demo, conectar a API
+    │   │   ├── app/page.tsx         
+    │   │   ├── components/Plot3D.tsx 
     │   │   └── lib/api.ts           # ✅ Definido pero no usado
     │   └── ...configuración...
     └── docs/

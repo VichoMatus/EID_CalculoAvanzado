@@ -44,15 +44,26 @@ export default function Plot3D({ datos, puntoOptimo, cargando, modo = 'superfici
   }
 
   if (puntoOptimo) {
-    trazas.push({
-      type: 'scatter3d',
-      x: [puntoOptimo.x_optimo],
-      y: [puntoOptimo.y_optimo],
-      z: [puntoOptimo.valor_optimo],
-      mode: 'markers',
-      marker: { size: 8, color: 'red', symbol: 'diamond' },
-      name: 'Punto óptimo',
-    } as Plotly.Data);
+    if (modo === 'superficie') {
+      trazas.push({
+        type: 'scatter3d',
+        x: [puntoOptimo.x_optimo],
+        y: [puntoOptimo.y_optimo],
+        z: [puntoOptimo.valor_optimo],
+        mode: 'markers',
+        marker: { size: 8, color: 'red', symbol: 'diamond' },
+        name: 'Punto óptimo',
+      } as Plotly.Data);
+    } else {
+      trazas.push({
+        type: 'scatter',
+        x: [puntoOptimo.x_optimo],
+        y: [puntoOptimo.y_optimo],
+        mode: 'markers',
+        marker: { size: 12, color: 'red', symbol: 'diamond' },
+        name: 'Punto óptimo',
+      } as Plotly.Data);
+    }
   }
 
   return (
@@ -76,7 +87,9 @@ export default function Plot3D({ datos, puntoOptimo, cargando, modo = 'superfici
         layout={{
           title: { text: 'R(x, y) — Superficie de rendimiento', font: { size: 14 } },
           autosize: true,
-          margin: { l: 0, r: 0, t: 40, b: 0 },
+          margin: { l: 60, r: 40, t: 40, b: 60 },
+          xaxis: { title: 'x (recurso 1)' },
+          yaxis: { title: 'y (recurso 2)' },
           scene: {
             xaxis: { title: 'x (recurso 1)' },
             yaxis: { title: 'y (recurso 2)' },
