@@ -75,7 +75,67 @@ export default function Home() {
       <main className="flex flex-col gap-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Panel izquierdo: parámetros y resultados */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
+          {modoInteractividad === 'base' ? (
+            <div className="lg:col-span-1 flex flex-col gap-6">
+              <Card className="glass-card border-emerald-500/20 shadow-sm">
+                <CardHeader className="border-b border-emerald-900/5 pb-4 mb-4 bg-emerald-50/30">
+                  <CardTitle className="text-emerald-950 flex items-center gap-2">
+                    Resumen del Modelo (Caso Base)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2 text-sm">
+                    <h3 className="font-semibold text-emerald-900 border-l-2 border-emerald-500 pl-2">Parámetros Establecidos</h3>
+                    <div className="grid grid-cols-2 gap-4 bg-emerald-50/50 p-3 rounded-lg border border-emerald-100 mt-2">
+                      <div className="flex justify-between"><span className="text-emerald-900/70">a:</span> <span className="font-mono font-medium">{constA}</span></div>
+                      <div className="flex justify-between"><span className="text-emerald-900/70">b:</span> <span className="font-mono font-medium">{constB}</span></div>
+                      <div className="flex justify-between"><span className="text-emerald-900/70">c:</span> <span className="font-mono font-medium">{constC}</span></div>
+                      <div className="flex justify-between"><span className="text-emerald-900/70">d:</span> <span className="font-mono font-medium">{constD}</span></div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <h3 className="font-semibold text-emerald-900 border-l-2 border-emerald-500 pl-2">Rangos de Simulación</h3>
+                    <div className="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100 mt-2 space-y-2">
+                      <div className="flex justify-between"><span className="text-emerald-900/70">Agua (x):</span> <span className="font-mono font-medium">[0.1, {rangoX}]</span></div>
+                      <div className="flex justify-between"><span className="text-emerald-900/70">Fertilizante (y):</span> <span className="font-mono font-medium">[0.1, {rangoY}]</span></div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <h3 className="font-semibold text-emerald-900 border-l-2 border-emerald-500 pl-2">Punto de Máximo Rendimiento</h3>
+                    {cargandoOptimo ? (
+                      <div className="p-4 text-center text-emerald-900/60 italic animate-pulse">
+                        Calculando punto óptimo...
+                      </div>
+                    ) : resultadoOptimo ? (
+                      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-lg border border-emerald-200 shadow-sm mt-2 space-y-3">
+                        <div className="flex justify-between border-b border-emerald-900/5 pb-2">
+                          <span className="text-emerald-900/70">x óptimo (Agua)</span>
+                          <span className="font-mono font-bold text-emerald-900">{resultadoOptimo.x_optimo.toFixed(4)}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-emerald-900/5 pb-2">
+                          <span className="text-emerald-900/70">y óptimo (Fertilizante)</span>
+                          <span className="font-mono font-bold text-emerald-900">{resultadoOptimo.y_optimo.toFixed(4)}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-emerald-900/5 pb-2 mt-1">
+                          <span className="text-emerald-900 font-semibold">Rendimiento Máximo</span>
+                          <span className="font-mono font-bold text-emerald-700 text-lg">{resultadoOptimo.valor_optimo.toFixed(6)}</span>
+                        </div>
+                        <div className="flex justify-between pt-1 items-center">
+                          <span className="text-emerald-900/70 text-xs">Naturaleza del punto</span>
+                          <span className="capitalize text-emerald-800 font-semibold text-[10px] uppercase tracking-wider bg-emerald-200/50 px-2 py-1 rounded-full border border-emerald-200">{resultadoOptimo.tipo.replace(/_/g, ' ')}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-emerald-900/60 text-center p-2">Sin resultados. Revisa la conexión al backend.</div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="lg:col-span-1 flex flex-col gap-6">
 
           {/* Constantes del modelo */}
           <Card className="glass-card">
@@ -293,7 +353,8 @@ export default function Home() {
               {error}
             </div>
           )}
-        </div>
+            </div>
+          )}
 
         {/* Panel derecho: gráfico 3D */}
         <Card className="lg:col-span-2 glass-card h-fit lg:sticky lg:top-6 overflow-hidden">

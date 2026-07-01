@@ -18,7 +18,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export function useOptiAgro() {
   // Modo de Interactividad
-  const [modoInteractividad, setModoInteractividad] = useState<string>('exploracion');
+  const [modoInteractividad, setModoInteractividad] = useState<string>('base');
 
   const restaurarCasoBase = useCallback(() => {
     setConstA('2');
@@ -130,22 +130,37 @@ export function useOptiAgro() {
     }
   }, []);
 
-  useEffect(() => {
-    cargarSuperficie();
-  }, [cargarSuperficie]);
+  const handleOptimizar = useCallback(async () => {
+    setError(null);
+    setCargandoOptimo(true);
+    try {
+      let datos;
+      if (conPresupuesto) {
+        datos = await optimizeBudget(
+          { a: parseFloat(constA) || 2, b: parseFloat(constB) || 2, c: parseFloat(constC) || 0.5, d: parseFloat(constD) || 0.5 },
+          parseFloat(costoX) || 1,
+          parseFloat(costoY) || 1,
+          parseFloat(presupuesto) || 10
+        );
+      } else {
+        datos = await optimize({ a: parseFloat(constA) || 2, b: parseFloat(constB) || 2, c: parseFloat(constC) || 0.5, d: parseFloat(constD) || 0.5 });
+      }
+      setResultadoOptimo(datos);
+    } catch {
+      setError('Error al optimizar.');
+    } finally {
+      setCargandoOptimo(false);
+    }
+  }, [conPresupuesto, costoX, costoY, presupuesto, constA, constB, constC, constD]);
 
-  useEffect(() => {
-    cargarEscenarios();
-  }, [cargarEscenarios]);
-
-  const handleCalcular = async () => {
+  const handleCalcular = useCallback(async () => {
     setError(null);
     setCargandoCalculo(true);
     try {
       const datos = await calculate(
         parseFloat(valorX) || 0,
         parseFloat(valorY) || 0,
-        parametrosModelo,
+        { a: parseFloat(constA) || 2, b: parseFloat(constB) || 2, c: parseFloat(constC) || 0.5, d: parseFloat(constD) || 0.5 },
         parseFloat(vectorUx) || 0,
         parseFloat(vectorUy) || 0,
         parseFloat(evalX) || 0,
@@ -157,30 +172,23 @@ export function useOptiAgro() {
     } finally {
       setCargandoCalculo(false);
     }
-  };
+  }, [valorX, valorY, constA, constB, constC, constD, vectorUx, vectorUy, evalX, evalY]);
 
-  const handleOptimizar = async () => {
-    setError(null);
-    setCargandoOptimo(true);
-    try {
-      let datos;
-      if (conPresupuesto) {
-        datos = await optimizeBudget(
-          parametrosModelo,
-          parseFloat(costoX) || 1,
-          parseFloat(costoY) || 1,
-          parseFloat(presupuesto) || 10
-        );
-      } else {
-        datos = await optimize(parametrosModelo);
-      }
-      setResultadoOptimo(datos);
-    } catch {
-      setError('Error al optimizar.');
-    } finally {
-      setCargandoOptimo(false);
+  useEffect(() => {
+    cargarSuperficie();
+  }, [cargarSuperficie]);
+
+  useEffect(() => {
+    cargarEscenarios();
+  }, [cargarEscenarios]);
+
+  useEffect(() => {
+    if (modoInteractividad === 'base') {
+      handleOptimizar();
+      // Opcional: También calcular el rendimiento base si se desea
+      // handleCalcular();
     }
-  };
+  }, [modoInteractividad, handleOptimizar]);
 
   const handleGuardarEscenario = async () => {
     if (!resultadoCalculo) return;

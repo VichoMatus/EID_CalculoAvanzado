@@ -71,18 +71,124 @@ def generar_superficie(a=2, b=2, c=0.5, d=0.5, rango_x=10, rango_y=10, puntos=40
 
 
 def encontrar_punto_critico(a=2, b=2, c=0.5, d=0.5):
-	x_optimo = float(a / c)
-	y_optimo = float(b / d)
-	valor_optimo = float(calcular_funcion(x_optimo, y_optimo, a=a, b=b, c=c, d=d))
-
-	return {
-		"x_optimo": x_optimo,
-		"y_optimo": y_optimo,
-		"valor_optimo": valor_optimo,
-		"tipo": "maximo",
-	}
+	try:
+		a_s, b_s, c_s, d_s = sp.symbols("a b c d", real=True)
+		subs_dict = {a_s: a, b_s: b, c_s: c, d_s: d}
+		
+		eq1 = derivada_parcial_x.subs(subs_dict)
+		eq2 = derivada_parcial_y.subs(subs_dict)
+		
+		soluciones = sp.solve((eq1, eq2), (x, y), dict=True)
+		
+		punto_critico = None
+		for sol in soluciones:
+			x_sol = sol.get(x)
+			y_sol = sol.get(y)
+			if x_sol is not None and y_sol is not None:
+				try:
+					x_val = float(x_sol)
+					y_val = float(y_sol)
+					if x_val > 0 and y_val > 0:
+						punto_critico = sol
+						break
+				except (TypeError, ValueError):
+					pass
+					
+		if punto_critico:
+			x_opt = float(punto_critico[x])
+			y_opt = float(punto_critico[y])
+			
+			d2R_dx2 = sp.diff(derivada_parcial_x, x).subs(subs_dict)
+			d2R_dy2 = sp.diff(derivada_parcial_y, y).subs(subs_dict)
+			d2R_dxdy = sp.diff(derivada_parcial_x, y).subs(subs_dict)
+			
+			A = float(d2R_dx2.subs({x: x_opt, y: y_opt}))
+			C = float(d2R_dy2.subs({x: x_opt, y: y_opt}))
+			B = float(d2R_dxdy.subs({x: x_opt, y: y_opt}))
+			
+			D = A * C - B**2
+			
+			tipo = "punto_silla"
+			if D > 0 and A < 0:
+				tipo = "maximo_local_absoluto"
+			elif D > 0 and A > 0:
+				tipo = "minimo_local"
+				
+			valor_optimo = float(calcular_funcion(x_opt, y_opt, a=a, b=b, c=c, d=d))
+			
+			return {
+				"x_optimo": x_opt,
+				"y_optimo": y_opt,
+				"valor_optimo": valor_optimo,
+				"tipo": tipo,
+			}
+	except Exception:
+		pass
+		
+	def objetivo(vars):
+		return -funcion_R_numerica(vars[0], vars[1], a, b, c, d)
+		
+	punto_inicial = [1.0, 1.0]
+	limites = ((0.1, None), (0.1, None))
+	resultado = opt.minimize(objetivo, punto_inicial, bounds=limites)
+	
+	if resultado.success:
+		return {
+			"x_optimo": float(resultado.x[0]),
+			"y_optimo": float(resultado.x[1]),
+			"valor_optimo": float(-resultado.fun),
+			"tipo": "maximo_local_absoluto"
+		}
+	else:
+		return {
+			"x_optimo": 0.0,
+			"y_optimo": 0.0,
+			"valor_optimo": 0.0,
+			"tipo": "error"
+		}
 
 def optimizar_con_restriccion(C_x, C_y, B, a=2, b=2, c=0.5, d=0.5):
+	try:
+		a_s, b_s, c_s, d_s = sp.symbols("a b c d", real=True)
+		lam = sp.symbols("lam", real=True)
+		subs_dict = {a_s: a, b_s: b, c_s: c, d_s: d}
+		
+		R_expr = funcion_R.subs(subs_dict)
+		L = R_expr + lam * (B - C_x * x - C_y * y)
+		
+		dL_dx = sp.diff(L, x)
+		dL_dy = sp.diff(L, y)
+		dL_dlam = sp.diff(L, lam)
+		
+		soluciones = sp.solve((dL_dx, dL_dy, dL_dlam), (x, y, lam), dict=True)
+		
+		punto_opt = None
+		for sol in soluciones:
+			x_sol = sol.get(x)
+			y_sol = sol.get(y)
+			if x_sol is not None and y_sol is not None:
+				try:
+					x_val = float(x_sol)
+					y_val = float(y_sol)
+					if x_val > 0 and y_val > 0:
+						punto_opt = sol
+						break
+				except (TypeError, ValueError):
+					pass
+					
+		if punto_opt:
+			x_opt = float(punto_opt[x])
+			y_opt = float(punto_opt[y])
+			valor_opt = float(R_expr.subs({x: x_opt, y: y_opt}))
+			return {
+				"x_optimo": x_opt,
+				"y_optimo": y_opt,
+				"valor_optimo": valor_opt,
+				"tipo": "maximo_presupuesto"
+			}
+	except Exception:
+		pass
+
 	def objetivo(vars):
 		return -funcion_R_numerica(vars[0], vars[1], a, b, c, d)
 	
