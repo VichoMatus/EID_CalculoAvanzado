@@ -46,11 +46,11 @@ export async function optimize(parametros: ParametrosModelo) {
   return respuesta.json();
 }
 
-export async function optimizeBudget(parametros: ParametrosModelo, costo_x: number, costo_y: number, presupuesto: number) {
+export async function optimizeBudget(parametros: ParametrosModelo, costo_x: number, costo_y: number, presupuesto: number, rango_x: number, rango_y: number) {
   const respuesta = await fetch(`${BASE_URL}/optimize_budget`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...parametros, costo_x, costo_y, presupuesto }),
+    body: JSON.stringify({ ...parametros, costo_x, costo_y, presupuesto, rango_x, rango_y }),
   });
   if (!respuesta.ok) throw new Error('Error en /optimize_budget');
   return respuesta.json();

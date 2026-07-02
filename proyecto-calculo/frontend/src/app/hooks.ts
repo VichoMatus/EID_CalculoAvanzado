@@ -110,7 +110,7 @@ export function useOptiAgro() {
         d: String(parseFloat(debouncedD) || 0.5),
         rango_x: String(debouncedRangoX),
         rango_y: String(debouncedRangoY),
-        puntos: '40',
+        puntos: '25',
       });
       const datos = await getSurface(params.toString());
       setDatosSuperficie(datos);
@@ -140,7 +140,9 @@ export function useOptiAgro() {
           { a: parseFloat(constA) || 2, b: parseFloat(constB) || 2, c: parseFloat(constC) || 0.5, d: parseFloat(constD) || 0.5 },
           parseFloat(costoX) || 1,
           parseFloat(costoY) || 1,
-          parseFloat(presupuesto) || 10
+          parseFloat(presupuesto) || 10,
+          debouncedRangoX,
+          debouncedRangoY
         );
       } else {
         datos = await optimize({ a: parseFloat(constA) || 2, b: parseFloat(constB) || 2, c: parseFloat(constC) || 0.5, d: parseFloat(constD) || 0.5 });

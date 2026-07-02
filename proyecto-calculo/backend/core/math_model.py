@@ -3,20 +3,34 @@ import sympy as sp
 import scipy.optimize as opt
 
 x, y, a, b, c, d = sp.symbols("x y a b c d", real=True)
+B_sym, C_x_sym, C_y_sym, lam = sp.symbols("B_sym C_x_sym C_y_sym lam", real=True)
 
+# 1. Definiciones base globales
 funcion_R = x**a * y**b * sp.exp(-c * x) * sp.exp(-d * y)
+
+# 2. Derivadas globales (Caché en memoria)
 derivada_parcial_x = sp.diff(funcion_R, x)
 derivada_parcial_y = sp.diff(funcion_R, y)
 
+# Derivadas segundas globales
+d2R_dx2_sym = sp.diff(derivada_parcial_x, x)
+d2R_dy2_sym = sp.diff(derivada_parcial_y, y)
+d2R_dxdy_sym = sp.diff(derivada_parcial_x, y)
+
+# Lagrangiano global
+L_sym = funcion_R + lam * (B_sym - C_x_sym * x - C_y_sym * y)
+dL_dx_sym = sp.diff(L_sym, x)
+dL_dy_sym = sp.diff(L_sym, y)
+dL_dlam_sym = sp.diff(L_sym, lam)
+
+# 3. Funciones NumPy globales
 funcion_R_numerica = sp.lambdify((x, y, a, b, c, d), funcion_R, modules="numpy")
 derivada_x_numerica = sp.lambdify((x, y, a, b, c, d), derivada_parcial_x, modules="numpy")
 derivada_y_numerica = sp.lambdify((x, y, a, b, c, d), derivada_parcial_y, modules="numpy")
 
-
 def calcular_funcion(x_val, y_val, a=2, b=2, c=0.5, d=0.5):
 	valor = funcion_R_numerica(x_val, y_val, a, b, c, d)
 	return float(valor)
-
 
 def calcular_derivadas(x_val, y_val, a=2, b=2, c=0.5, d=0.5):
 	parcial_x = derivada_x_numerica(x_val, y_val, a, b, c, d)
@@ -26,7 +40,6 @@ def calcular_derivadas(x_val, y_val, a=2, b=2, c=0.5, d=0.5):
 		"parcial_y": float(parcial_y),
 	}
 
-
 def calcular_gradiente(x_val, y_val, a=2, b=2, c=0.5, d=0.5):
 	derivadas = calcular_derivadas(x_val, y_val, a=a, b=b, c=c, d=d)
 	gradiente = [derivadas["parcial_x"], derivadas["parcial_y"]]
@@ -35,7 +48,6 @@ def calcular_gradiente(x_val, y_val, a=2, b=2, c=0.5, d=0.5):
 		"gradiente": gradiente,
 		"magnitud": magnitud,
 	}
-
 
 def calcular_derivada_direccional(x_val, y_val, u_x, u_y, a=2, b=2, c=0.5, d=0.5):
 	norma = np.sqrt(u_x**2 + u_y**2)
@@ -49,13 +61,11 @@ def calcular_derivada_direccional(x_val, y_val, u_x, u_y, a=2, b=2, c=0.5, d=0.5
 	derivada_dir = gradiente[0] * u_x_norm + gradiente[1] * u_y_norm
 	return float(derivada_dir)
 
-
 def calcular_plano_tangente(x0, y0, x_eval, y_eval, a=2, b=2, c=0.5, d=0.5):
 	z0 = calcular_funcion(x0, y0, a=a, b=b, c=c, d=d)
 	derivadas = calcular_derivadas(x0, y0, a=a, b=b, c=c, d=d)
 	z_aprox = z0 + derivadas["parcial_x"] * (x_eval - x0) + derivadas["parcial_y"] * (y_eval - y0)
 	return float(z_aprox)
-
 
 def generar_superficie(a=2, b=2, c=0.5, d=0.5, rango_x=10, rango_y=10, puntos=40):
 	grilla_x = np.linspace(0.1, rango_x, puntos)
@@ -68,7 +78,6 @@ def generar_superficie(a=2, b=2, c=0.5, d=0.5, rango_x=10, rango_y=10, puntos=40
 		"y": y_mesh.tolist(),
 		"z": np.asarray(valores_z, dtype=float).tolist(),
 	}
-
 
 def encontrar_punto_critico(a=2, b=2, c=0.5, d=0.5):
 	try:
@@ -98,15 +107,15 @@ def encontrar_punto_critico(a=2, b=2, c=0.5, d=0.5):
 			x_opt = float(punto_critico[x])
 			y_opt = float(punto_critico[y])
 			
-			d2R_dx2 = sp.diff(derivada_parcial_x, x).subs(subs_dict)
-			d2R_dy2 = sp.diff(derivada_parcial_y, y).subs(subs_dict)
-			d2R_dxdy = sp.diff(derivada_parcial_x, y).subs(subs_dict)
+			d2R_dx2 = d2R_dx2_sym.subs(subs_dict)
+			d2R_dy2 = d2R_dy2_sym.subs(subs_dict)
+			d2R_dxdy = d2R_dxdy_sym.subs(subs_dict)
 			
 			A = float(d2R_dx2.subs({x: x_opt, y: y_opt}))
 			C = float(d2R_dy2.subs({x: x_opt, y: y_opt}))
-			B = float(d2R_dxdy.subs({x: x_opt, y: y_opt}))
+			B_hess = float(d2R_dxdy.subs({x: x_opt, y: y_opt}))
 			
-			D = A * C - B**2
+			D = A * C - B_hess**2
 			
 			tipo = "punto_silla"
 			if D > 0 and A < 0:
@@ -147,20 +156,20 @@ def encontrar_punto_critico(a=2, b=2, c=0.5, d=0.5):
 			"tipo": "error"
 		}
 
-def optimizar_con_restriccion(C_x, C_y, B, a=2, b=2, c=0.5, d=0.5):
+def optimizar_con_restriccion(C_x, C_y, B, a=2, b=2, c=0.5, d=0.5, rango_x=50.0, rango_y=50.0):
+	max_x = min(B / C_x, rango_x * 2.0) if C_x > 0 else rango_x * 2.0
+	max_y = min(B / C_y, rango_y * 2.0) if C_y > 0 else rango_y * 2.0
+
 	try:
 		a_s, b_s, c_s, d_s = sp.symbols("a b c d", real=True)
-		lam = sp.symbols("lam", real=True)
-		subs_dict = {a_s: a, b_s: b, c_s: c, d_s: d}
+		B_s, C_x_s, C_y_s = sp.symbols("B_sym C_x_sym C_y_sym", real=True)
+		subs_dict = {a_s: a, b_s: b, c_s: c, d_s: d, B_s: B, C_x_s: C_x, C_y_s: C_y}
 		
-		R_expr = funcion_R.subs(subs_dict)
-		L = R_expr + lam * (B - C_x * x - C_y * y)
+		eq1 = dL_dx_sym.subs(subs_dict)
+		eq2 = dL_dy_sym.subs(subs_dict)
+		eq3 = dL_dlam_sym.subs(subs_dict)
 		
-		dL_dx = sp.diff(L, x)
-		dL_dy = sp.diff(L, y)
-		dL_dlam = sp.diff(L, lam)
-		
-		soluciones = sp.solve((dL_dx, dL_dy, dL_dlam), (x, y, lam), dict=True)
+		soluciones = sp.solve((eq1, eq2, eq3), (x, y, lam), dict=True)
 		
 		punto_opt = None
 		for sol in soluciones:
@@ -170,7 +179,7 @@ def optimizar_con_restriccion(C_x, C_y, B, a=2, b=2, c=0.5, d=0.5):
 				try:
 					x_val = float(x_sol)
 					y_val = float(y_sol)
-					if x_val > 0 and y_val > 0:
+					if 0 < x_val <= max_x and 0 < y_val <= max_y:
 						punto_opt = sol
 						break
 				except (TypeError, ValueError):
@@ -179,7 +188,7 @@ def optimizar_con_restriccion(C_x, C_y, B, a=2, b=2, c=0.5, d=0.5):
 		if punto_opt:
 			x_opt = float(punto_opt[x])
 			y_opt = float(punto_opt[y])
-			valor_opt = float(R_expr.subs({x: x_opt, y: y_opt}))
+			valor_opt = float(calcular_funcion(x_opt, y_opt, a=a, b=b, c=c, d=d))
 			return {
 				"x_optimo": x_opt,
 				"y_optimo": y_opt,
@@ -196,7 +205,7 @@ def optimizar_con_restriccion(C_x, C_y, B, a=2, b=2, c=0.5, d=0.5):
 		{'type': 'ineq', 'fun': lambda vars: B - C_x * vars[0] - C_y * vars[1]}
 	]
 	
-	limites = ((0.1, None), (0.1, None))
+	limites = ((0.1, max_x), (0.1, max_y))
 	
 	punto_inicial = [B / (2 * C_x), B / (2 * C_y)] if C_x > 0 and C_y > 0 else [1.0, 1.0]
 	

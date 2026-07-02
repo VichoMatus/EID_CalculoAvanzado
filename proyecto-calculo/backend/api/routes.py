@@ -93,8 +93,10 @@ def optimize_budget():
     costo_x = data.get('costo_x', 1.0)
     costo_y = data.get('costo_y', 1.0)
     presupuesto = data.get('presupuesto', 10.0)
+    rango_x = data.get('rango_x', 50.0)
+    rango_y = data.get('rango_y', 50.0)
 
-    resultado = optimizar_con_restriccion(C_x=costo_x, C_y=costo_y, B=presupuesto, a=a, b=b, c=c, d=d)
+    resultado = optimizar_con_restriccion(C_x=costo_x, C_y=costo_y, B=presupuesto, a=a, b=b, c=c, d=d, rango_x=rango_x, rango_y=rango_y)
 
     return jsonify({
         'x_optimo': resultado['x_optimo'],
@@ -105,7 +107,7 @@ def optimize_budget():
 
 @api_bp.route('/escenarios', methods=['GET'])
 def get_escenarios():
-    escenarios = Escenario.query.all()
+    escenarios = Escenario.query.order_by(Escenario.id.desc()).limit(10).all()
     return jsonify([e.to_dict() for e in escenarios])
 
 @api_bp.route('/escenarios', methods=['POST'])

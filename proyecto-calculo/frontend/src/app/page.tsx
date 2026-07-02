@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import Plot3D from '@/components/Plot3D';
 import { useOptiAgro } from './hooks';
 
@@ -57,8 +58,8 @@ export default function Home() {
         <p className="text-emerald-900/70 font-medium text-lg text-center max-w-2xl">
           Modelo Matemático de Rendimiento Agrícola y Optimización de Recursos
         </p>
-        <Tabs 
-          value={modoInteractividad} 
+        <Tabs
+          value={modoInteractividad}
           onValueChange={(val) => {
             setModoInteractividad(val);
             if (val === 'base') restaurarCasoBase();
@@ -93,7 +94,7 @@ export default function Home() {
                       <div className="flex justify-between"><span className="text-emerald-900/70">d:</span> <span className="font-mono font-medium">{constD}</span></div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2 text-sm">
                     <h3 className="font-semibold text-emerald-900 border-l-2 border-emerald-500 pl-2">Rangos de Simulación</h3>
                     <div className="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100 mt-2 space-y-2">
@@ -137,257 +138,306 @@ export default function Home() {
           ) : (
             <div className="lg:col-span-1 flex flex-col gap-6">
 
-          {/* Constantes del modelo */}
-          <Card className="glass-card">
-            <CardHeader className="border-b border-emerald-900/5 pb-4 mb-4">
-              <CardTitle className="text-emerald-950">Constantes del modelo</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { id: 'constA', label: 'a', valor: constA, setter: setConstA },
-                  { id: 'constB', label: 'b', valor: constB, setter: setConstB },
-                  { id: 'constC', label: 'c', valor: constC, setter: setConstC },
-                  { id: 'constD', label: 'd', valor: constD, setter: setConstD },
-                ].map(({ id, label, valor, setter }) => (
-                  <div key={id} className="space-y-1">
-                    <Label htmlFor={id} className="text-emerald-900">{label}</Label>
-                    <Input
-                      id={id}
-                      type="number"
-                      step="0.1"
-                      value={valor}
-                      onChange={(e) => setter(e.target.value)}
+              {/* Constantes del modelo */}
+              <Card className="glass-card">
+                <CardHeader className="border-b border-emerald-900/5 pb-4 mb-4">
+                  <CardTitle className="text-emerald-950">Constantes del modelo</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      { id: 'constA', label: 'a', valor: constA, setter: setConstA },
+                      { id: 'constB', label: 'b', valor: constB, setter: setConstB },
+                      { id: 'constC', label: 'c', valor: constC, setter: setConstC },
+                      { id: 'constD', label: 'd', valor: constD, setter: setConstD },
+                    ].map(({ id, label, valor, setter }) => (
+                      <div key={id} className="space-y-1">
+                        <Label htmlFor={id} className="text-emerald-900">{label}</Label>
+                        <Input
+                          id={id}
+                          type="number"
+                          step="0.1"
+                          value={valor}
+                          onChange={(e) => setter(e.target.value)}
+                          disabled={modoInteractividad === 'base'}
+                          className="transition-all hover:border-emerald-400 focus:border-emerald-600 focus:ring-emerald-600/20 disabled:opacity-60"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-2 pt-2">
+                    <Label className="text-emerald-900 font-semibold">Rango X (Agua): {rangoX}</Label>
+                    <Slider
+                      value={[rangoX]}
+                      min={2}
+                      max={150}
+                      step={1}
                       disabled={modoInteractividad === 'base'}
-                      className="transition-all hover:border-emerald-400 focus:border-emerald-600 focus:ring-emerald-600/20 disabled:opacity-60"
+                      onValueChange={(val: any) => setRangoX(Array.isArray(val) ? val[0] : val)}
+                      className="py-2 disabled:opacity-60"
                     />
                   </div>
-                ))}
-              </div>
-              <div className="space-y-2 pt-2">
-                <Label className="text-emerald-900 font-semibold">Rango X (Agua): {rangoX}</Label>
-                <Slider
-                  value={[rangoX]}
-                  min={2}
-                  max={50}
-                  step={1}
-                  disabled={modoInteractividad === 'base'}
-                  onValueChange={(val: any) => setRangoX(Array.isArray(val) ? val[0] : val)}
-                  className="py-2 disabled:opacity-60"
-                />
-              </div>
-              <div className="space-y-2 pt-2">
-                <Label className="text-emerald-900 font-semibold">Rango Y (Fertilizante): {rangoY}</Label>
-                <Slider
-                  value={[rangoY]}
-                  min={2}
-                  max={50}
-                  step={1}
-                  disabled={modoInteractividad === 'base'}
-                  onValueChange={(val: any) => setRangoY(Array.isArray(val) ? val[0] : val)}
-                  className="py-2 disabled:opacity-60"
-                />
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="space-y-2 pt-2">
+                    <Label className="text-emerald-900 font-semibold">Rango Y (Fertilizante): {rangoY}</Label>
+                    <Slider
+                      value={[rangoY]}
+                      min={2}
+                      max={150}
+                      step={1}
+                      disabled={modoInteractividad === 'base'}
+                      onValueChange={(val: any) => setRangoY(Array.isArray(val) ? val[0] : val)}
+                      className="py-2 disabled:opacity-60"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Punto a evaluar */}
-          <Card className="glass-card">
-            <CardHeader className="border-b border-emerald-900/5 pb-4 mb-4">
-              <CardTitle className="text-emerald-950">Evaluar punto</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="valorX" className="text-emerald-900">x</Label>
-                  <Input id="valorX" type="number" step="0.1" value={valorX} onChange={(e) => setValorX(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="valorY" className="text-emerald-900">y</Label>
-                  <Input id="valorY" type="number" step="0.1" value={valorY} onChange={(e) => setValorY(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
-                </div>
-              </div>
-              {/* Nuevos campos para derivadas direccionales y plano tangente */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="vectorUx" className="text-emerald-900">Vector u (x)</Label>
-                  <Input id="vectorUx" type="number" step="0.1" value={vectorUx} onChange={(e) => setVectorUx(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="vectorUy" className="text-emerald-900">Vector u (y)</Label>
-                  <Input id="vectorUy" type="number" step="0.1" value={vectorUy} onChange={(e) => setVectorUy(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="evalX" className="text-emerald-900">Eval. linealización (x)</Label>
-                  <Input id="evalX" type="number" step="0.1" value={evalX} onChange={(e) => setEvalX(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="evalY" className="text-emerald-900">Eval. linealización (y)</Label>
-                  <Input id="evalY" type="number" step="0.1" value={evalY} onChange={(e) => setEvalY(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
-                </div>
-              </div>
-              <Button className="w-full mt-4 bg-gradient-primary border-none py-6 text-base font-semibold" onClick={handleCalcular} disabled={cargandoCalculo}>
-                {cargandoCalculo ? 'Calculando...' : 'Calcular Rendimiento'}
-              </Button>
-            </CardContent>
-          </Card>
+              {/* Punto a evaluar */}
+              <Card className="glass-card">
+                <CardHeader className="border-b border-emerald-900/5 pb-4 mb-4">
+                  <CardTitle className="text-emerald-950">Evaluar punto</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="valorX" className="text-emerald-900">x</Label>
+                      <Input id="valorX" type="number" step="0.1" value={valorX} onChange={(e) => setValorX(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="valorY" className="text-emerald-900">y</Label>
+                      <Input id="valorY" type="number" step="0.1" value={valorY} onChange={(e) => setValorY(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
+                    </div>
+                  </div>
+                  {/* Nuevos campos para derivadas direccionales y plano tangente */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="vectorUx" className="text-emerald-900">Vector u (x)</Label>
+                      <Input id="vectorUx" type="number" step="0.1" value={vectorUx} onChange={(e) => setVectorUx(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="vectorUy" className="text-emerald-900">Vector u (y)</Label>
+                      <Input id="vectorUy" type="number" step="0.1" value={vectorUy} onChange={(e) => setVectorUy(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="evalX" className="text-emerald-900">Eval. linealización (x)</Label>
+                      <Input id="evalX" type="number" step="0.1" value={evalX} onChange={(e) => setEvalX(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="evalY" className="text-emerald-900">Eval. linealización (y)</Label>
+                      <Input id="evalY" type="number" step="0.1" value={evalY} onChange={(e) => setEvalY(e.target.value)} disabled={modoInteractividad === 'base'} className="transition-all hover:border-emerald-400 disabled:opacity-60" />
+                    </div>
+                  </div>
+                  <Button className="w-full mt-4 bg-gradient-primary border-none py-6 text-base font-semibold" onClick={handleCalcular} disabled={cargandoCalculo}>
+                    {cargandoCalculo ? 'Calculando...' : 'Calcular Rendimiento'}
+                  </Button>
+                </CardContent>
+              </Card>
 
-          {/* Resultados del cálculo */}
-          {resultadoCalculo && (
-            <Card className="glass-card border-emerald-500/30 overflow-hidden">
-              <div className="h-1 w-full bg-gradient-to-r from-emerald-400 to-teal-400"></div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-emerald-950">Resultados Analíticos</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">R(x, y)</span>
-                  <span className="font-mono font-semibold">{resultadoCalculo.resultado.toFixed(6)}</span>
+              {/* Resultados del cálculo */}
+              {resultadoCalculo && (
+                <Card className="glass-card border-emerald-500/30 overflow-hidden">
+                  <div className="h-1 w-full bg-gradient-to-r from-emerald-400 to-teal-400"></div>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-emerald-950">Resultados Analíticos</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm mt-2">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-emerald-900/70 font-serif text-xs">
+                        R(x,y) = x<sup>{constA}</sup> · y<sup>{constB}</sup> · e<sup>-{constC}x - {constD}y</sup>
+                      </span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-950 font-medium">Evaluación R({valorX}, {valorY})</span>
+                        <span className="font-mono font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">{resultadoCalculo.resultado.toFixed(6)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 border-t border-emerald-900/5 pt-3">
+                      <span className="text-emerald-900/70 font-serif text-xs">
+                        ∂R/∂x = R(x,y) · ({constA}/x - {constC})
+                      </span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-950 font-medium">Valor ∂R/∂x</span>
+                        <span className="font-mono bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{resultadoCalculo.partial_x.toFixed(6)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 border-t border-emerald-900/5 pt-3">
+                      <span className="text-emerald-900/70 font-serif text-xs">
+                        ∂R/∂y = R(x,y) · ({constB}/y - {constD})
+                      </span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-950 font-medium">Valor ∂R/∂y</span>
+                        <span className="font-mono bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{resultadoCalculo.partial_y.toFixed(6)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 border-t border-emerald-900/5 pt-3">
+                      <span className="text-emerald-900/70 font-serif text-xs">
+                        ∇R = [ ∂R/∂x , ∂R/∂y ]
+                      </span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-950 font-medium">Vector Gradiente ∇R</span>
+                        <span className="font-mono bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                          [{resultadoCalculo.gradiente[0].toFixed(4)}, {resultadoCalculo.gradiente[1].toFixed(4)}]
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 border-t border-emerald-900/5 pt-3">
+                      <span className="text-emerald-900/70 font-serif text-xs">
+                        ‖∇R‖ = √( (∂R/∂x)² + (∂R/∂y)² )
+                      </span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-950 font-medium">Magnitud ‖∇R‖</span>
+                        <span className="font-mono bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{resultadoCalculo.magnitud.toFixed(6)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 border-t border-emerald-900/5 pt-3">
+                      <span className="text-emerald-900/70 font-serif text-xs">
+                        D<sub>u</sub>R = ∇R · û
+                      </span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-950 font-medium">Derivada Direccional</span>
+                        <span className="font-mono bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{resultadoCalculo.derivada_direccional.toFixed(6)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 border-t border-emerald-900/5 pt-3">
+                      <span className="text-emerald-900/70 font-serif text-xs">
+                        L(x,y) ≈ R({valorX},{valorY}) + ∇R · &lt;x-{valorX}, y-{valorY}&gt;
+                      </span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-950 font-medium">Plano Tangente L({evalX}, {evalY})</span>
+                        <span className="font-mono bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{resultadoCalculo.aproximacion_tangente.toFixed(6)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <div className="p-6 pt-0">
+                    <Button
+                      variant="secondary"
+                      className="w-full bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-200 transition-all shadow-sm font-semibold"
+                      onClick={handleGuardarEscenario}
+                      disabled={cargandoEscenarios}
+                    >
+                      {cargandoEscenarios ? 'Guardando...' : 'Guardar Escenario en BD'}
+                    </Button>
+                  </div>
+                </Card>
+              )}
+
+              {/* Optimización */}
+              <Card className="glass-card">
+                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 border-b border-emerald-900/5 mb-4 gap-3 sm:gap-0">
+                  <CardTitle className="text-emerald-950">Optimización</CardTitle>
+                  <div className="flex items-center space-x-2 bg-emerald-50/50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                    <Checkbox
+                      id="conPresupuesto"
+                      checked={conPresupuesto}
+                      onCheckedChange={(checked) => setConPresupuesto(checked as boolean)}
+                      disabled={modoInteractividad === 'base'}
+                      className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                    />
+                    <label
+                      htmlFor="conPresupuesto"
+                      className="text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-emerald-900 cursor-pointer"
+                    >
+                      Restricción Presupuestaria
+                    </label>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {conPresupuesto && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="costoX" className="text-emerald-900">Costo x (C<sub>x</sub>)</Label>
+                        <Input id="costoX" type="number" value={costoX} onChange={(e) => setCostoX(e.target.value)} disabled={modoInteractividad === 'base'} className="focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-60" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="costoY" className="text-emerald-900">Costo y (C<sub>y</sub>)</Label>
+                        <Input id="costoY" type="number" value={costoY} onChange={(e) => setCostoY(e.target.value)} disabled={modoInteractividad === 'base'} className="focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-60" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="presupuesto" className="text-emerald-900">Presupuesto (B)</Label>
+                        <Input id="presupuesto" type="number" value={presupuesto} onChange={(e) => setPresupuesto(e.target.value)} disabled={modoInteractividad === 'base'} className="focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-60" />
+                      </div>
+                    </div>
+                  )}
+                  <Button
+                    className="w-full bg-gradient-primary border-none font-semibold"
+                    onClick={handleOptimizar}
+                    disabled={cargandoOptimo}
+                  >
+                    {cargandoOptimo ? 'Buscando óptimo...' : 'Encontrar máximo'}
+                  </Button>
+                  {resultadoOptimo && (
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">x óptimo</span>
+                        <span className="font-mono font-semibold">{resultadoOptimo.x_optimo.toFixed(4)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">y óptimo</span>
+                        <span className="font-mono font-semibold">{resultadoOptimo.y_optimo.toFixed(4)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">R máximo</span>
+                        <span className="font-mono font-semibold">{resultadoOptimo.valor_optimo.toFixed(6)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Tipo</span>
+                        <span className="capitalize">{resultadoOptimo.tipo}</span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Error */}
+              {error && (
+                <div className="rounded-lg border border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  {error}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">∂R/∂x</span>
-                  <span className="font-mono">{resultadoCalculo.partial_x.toFixed(6)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">∂R/∂y</span>
-                  <span className="font-mono">{resultadoCalculo.partial_y.toFixed(6)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">∇R</span>
-                  <span className="font-mono">
-                    [{resultadoCalculo.gradiente[0].toFixed(4)}, {resultadoCalculo.gradiente[1].toFixed(4)}]
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">‖∇R‖</span>
-                  <span className="font-mono">{resultadoCalculo.magnitud.toFixed(6)}</span>
-                </div>
-                <div className="flex justify-between border-t pt-2 mt-2">
-                  <span className="text-muted-foreground">D_u R(x,y)</span>
-                  <span className="font-mono">{resultadoCalculo.derivada_direccional.toFixed(6)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Plano Tangente (L)</span>
-                  <span className="font-mono">{resultadoCalculo.aproximacion_tangente.toFixed(6)}</span>
-                </div>
-              </CardContent>
-              <div className="p-6 pt-0">
+              )}
+            </div>
+          )}
+
+          {/* Panel derecho: gráfico 3D */}
+          <Card className="lg:col-span-2 glass-card h-fit lg:sticky lg:top-6 overflow-hidden">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 border-b border-emerald-900/5 mb-2 gap-3 sm:gap-0">
+              <CardTitle className="text-emerald-950">Visualización Topográfica</CardTitle>
+              <div className="flex w-full sm:w-auto gap-2 bg-emerald-50 p-1 rounded-lg border border-emerald-100">
                 <Button
-                  variant="secondary"
-                  className="w-full bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-200 transition-all shadow-sm font-semibold"
-                  onClick={handleGuardarEscenario}
-                  disabled={cargandoEscenarios}
+                  size="sm"
+                  variant={modoVista === 'superficie' ? 'default' : 'ghost'}
+                  onClick={() => setModoVista('superficie')}
+                  className={modoVista === 'superficie' ? 'bg-white text-emerald-900 shadow-sm' : 'text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/50'}
                 >
-                  {cargandoEscenarios ? 'Guardando...' : 'Guardar Escenario en BD'}
+                  Superficie 3D
+                </Button>
+                <Button
+                  size="sm"
+                  variant={modoVista === 'contorno' ? 'default' : 'ghost'}
+                  onClick={() => setModoVista('contorno')}
+                  className={modoVista === 'contorno' ? 'bg-white text-emerald-900 shadow-sm' : 'text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/50'}
+                >
+                  Curvas de Nivel
                 </Button>
               </div>
-            </Card>
-          )}
-
-          {/* Optimización */}
-          <Card className="glass-card">
-          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 border-b border-emerald-900/5 mb-4 gap-3 sm:gap-0">
-              <CardTitle className="text-emerald-950">Optimización</CardTitle>
-              <Button
-                size="sm"
-                variant={conPresupuesto ? 'default' : 'outline'}
-                onClick={() => setConPresupuesto(!conPresupuesto)}
-                disabled={modoInteractividad === 'base'}
-                className={conPresupuesto ? 'bg-amber-500 hover:bg-amber-600 text-white border-none disabled:opacity-60' : 'text-emerald-900 border-emerald-200 hover:bg-emerald-50 disabled:opacity-60'}
-              >
-                Restricción Presupuestaria
-              </Button>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {conPresupuesto && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="costoX" className="text-emerald-900">Costo x ($C_x$)</Label>
-                    <Input id="costoX" type="number" value={costoX} onChange={(e) => setCostoX(e.target.value)} disabled={modoInteractividad === 'base'} className="focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-60" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="costoY" className="text-emerald-900">Costo y ($C_y$)</Label>
-                    <Input id="costoY" type="number" value={costoY} onChange={(e) => setCostoY(e.target.value)} disabled={modoInteractividad === 'base'} className="focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-60" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="presupuesto" className="text-emerald-900">Ppto ($B$)</Label>
-                    <Input id="presupuesto" type="number" value={presupuesto} onChange={(e) => setPresupuesto(e.target.value)} disabled={modoInteractividad === 'base'} className="focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-60" />
-                  </div>
-                </div>
-              )}
-              <Button
-                className="w-full bg-gradient-primary border-none font-semibold"
-                onClick={handleOptimizar}
-                disabled={cargandoOptimo}
-              >
-                {cargandoOptimo ? 'Buscando óptimo...' : 'Encontrar máximo'}
-              </Button>
-              {resultadoOptimo && (
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">x óptimo</span>
-                    <span className="font-mono font-semibold">{resultadoOptimo.x_optimo.toFixed(4)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">y óptimo</span>
-                    <span className="font-mono font-semibold">{resultadoOptimo.y_optimo.toFixed(4)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">R máximo</span>
-                    <span className="font-mono font-semibold">{resultadoOptimo.valor_optimo.toFixed(6)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tipo</span>
-                    <span className="capitalize">{resultadoOptimo.tipo}</span>
-                  </div>
-                </div>
-              )}
+            <CardContent className="h-[400px] md:h-[500px] lg:h-[650px] p-2 relative w-full">
+              <Plot3D
+                datos={datosSuperficie ?? undefined}
+                puntoOptimo={resultadoOptimo}
+                cargando={cargandoSuperficie}
+                modo={modoVista}
+                rangoX={rangoX}
+                rangoY={rangoY}
+              />
             </CardContent>
           </Card>
-
-          {/* Error */}
-          {error && (
-            <div className="rounded-lg border border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-            </div>
-          )}
-
-        {/* Panel derecho: gráfico 3D */}
-        <Card className="lg:col-span-2 glass-card h-fit lg:sticky lg:top-6 overflow-hidden">
-          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 border-b border-emerald-900/5 mb-2 gap-3 sm:gap-0">
-            <CardTitle className="text-emerald-950">Visualización Topográfica</CardTitle>
-            <div className="flex w-full sm:w-auto gap-2 bg-emerald-50 p-1 rounded-lg border border-emerald-100">
-              <Button
-                size="sm"
-                variant={modoVista === 'superficie' ? 'default' : 'ghost'}
-                onClick={() => setModoVista('superficie')}
-                className={modoVista === 'superficie' ? 'bg-white text-emerald-900 shadow-sm' : 'text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/50'}
-              >
-                Superficie 3D
-              </Button>
-              <Button
-                size="sm"
-                variant={modoVista === 'contorno' ? 'default' : 'ghost'}
-                onClick={() => setModoVista('contorno')}
-                className={modoVista === 'contorno' ? 'bg-white text-emerald-900 shadow-sm' : 'text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/50'}
-              >
-                Curvas de Nivel
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="h-[400px] md:h-[500px] lg:h-[650px] p-2 relative w-full">
-            <Plot3D
-              datos={datosSuperficie ?? undefined}
-              puntoOptimo={resultadoOptimo}
-              cargando={cargandoSuperficie}
-              modo={modoVista}
-            />
-          </CardContent>
-        </Card>
         </div>
 
         {/* Panel Inferior: Tabla de Escenarios (ocupa 3 columnas) */}

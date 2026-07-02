@@ -16,9 +16,11 @@ interface Props {
   puntoOptimo?: { x_optimo: number; y_optimo: number; valor_optimo: number } | null;
   cargando?: boolean;
   modo?: 'superficie' | 'contorno';
+  rangoX?: number;
+  rangoY?: number;
 }
 
-export default function Plot3D({ datos, puntoOptimo, cargando, modo = 'superficie' }: Props) {
+export default function Plot3D({ datos, puntoOptimo, cargando, modo = 'superficie', rangoX = 10, rangoY = 10 }: Props) {
   const trazas: Plotly.Data[] = [];
 
   if (datos) {
@@ -43,31 +45,44 @@ export default function Plot3D({ datos, puntoOptimo, cargando, modo = 'superfici
     }
   }
 
+  let optimoExcedeLimites = false;
+
   if (puntoOptimo) {
-    if (modo === 'superficie') {
-      trazas.push({
-        type: 'scatter3d',
-        x: [puntoOptimo.x_optimo],
-        y: [puntoOptimo.y_optimo],
-        z: [puntoOptimo.valor_optimo],
-        mode: 'markers',
-        marker: { size: 8, color: 'red', symbol: 'diamond' },
-        name: 'Punto óptimo',
-      } as Plotly.Data);
-    } else {
-      trazas.push({
-        type: 'scatter',
-        x: [puntoOptimo.x_optimo],
-        y: [puntoOptimo.y_optimo],
-        mode: 'markers',
-        marker: { size: 12, color: 'red', symbol: 'diamond' },
-        name: 'Punto óptimo',
-      } as Plotly.Data);
+    if (puntoOptimo.x_optimo > rangoX || puntoOptimo.y_optimo > rangoY) {
+      optimoExcedeLimites = true;
+    }
+
+    if (!optimoExcedeLimites) {
+      if (modo === 'superficie') {
+        trazas.push({
+          type: 'scatter3d',
+          x: [puntoOptimo.x_optimo],
+          y: [puntoOptimo.y_optimo],
+          z: [puntoOptimo.valor_optimo],
+          mode: 'markers',
+          marker: { size: 8, color: 'red', symbol: 'diamond' },
+          name: 'Punto óptimo',
+        } as Plotly.Data);
+      } else {
+        trazas.push({
+          type: 'scatter',
+          x: [puntoOptimo.x_optimo],
+          y: [puntoOptimo.y_optimo],
+          mode: 'markers',
+          marker: { size: 12, color: 'red', symbol: 'diamond' },
+          name: 'Punto óptimo',
+        } as Plotly.Data);
+      }
     }
   }
 
   return (
     <div className="relative w-full h-full">
+      {optimoExcedeLimites && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-amber-100 text-amber-900 border border-amber-300 px-4 py-2 rounded-lg text-sm font-semibold shadow-md whitespace-nowrap">
+          Aviso: El óptimo económico excede el rango de tolerancia biológica del cultivo
+        </div>
+      )}
       {cargando && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 rounded-xl">
           <span className="text-sm text-muted-foreground">Cargando superficie...</span>
